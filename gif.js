@@ -6,7 +6,7 @@ var characters = [
 ];
 
 function createButtons (characters){
-    $("#friend-buttons").empty();
+   $("#friend-buttons").empty();
 for (var i=0; i < characters.length; i++){
     var button = $("<button>");
     button.addClass(".friend-buttons");
@@ -18,20 +18,19 @@ for (var i=0; i < characters.length; i++){
 
 $("#add-friend").on("click", function(event){
     event.preventDefault();
-    var newCharater = $(".gif").val().trim();
-    characters.push(newCharater);
-    $(".gif").val("");
-    createButtons();
+    var newCharater = $("#friend-input").eq(0).val();
+    if(newCharater.length > 2 ){
+        characters.push(newCharater);
+    }
+    createButtons(characters, "friend-buttons", "#friend-buttons")
 })
 
-$(document).on("click", ".friend-buttons", function(){
-    //$("#friends-gifs").empty();
+$(document).on("click", "#friend-buttons", function(){
+    $("#friends-gifs").empty();
     $("#friend-buttons").removeClass("active");
     $(this).addClass("active")
 
-    console.log("clicked")
-
-    var state = $(this).attr("data-name");
+    var state = $(this).attr("data-type");
     var queryURL = "http://api.giphy.com/v1/gifs/search?q="+state+"&api_key=XxXIlvXpSR2rIURzrBw2N2uudNcOPN8H&limit=10";
 
 
@@ -39,23 +38,23 @@ $(document).on("click", ".friend-buttons", function(){
         url: queryURL,
         method: "GET"
     }).then(function(response){
-        var result = response.data;
+        var results = response.data;
 
         for (var i=0; i< results.length; i++){
-            var friendDiv = $("#friend-gifs")
-            var rating = result[i].rating;
+            var friendDiv = $("<div class=\"friend-item\">")
+            var rating = results[i].rating;
 
             var rp = $("<p>").text("Rating: " + rating);
 
-            var active = results[i].images.fixed_height_url;
-            var still = results[i].images.fixed_height_still_url;
+            var active = results[i].images.fixed_height.url;
+            var still = results[i].images.fixed_height_still.url;
 
             var gif = $("<img>");
             gif.attr("src", still);
             gif.attr("data-still", still);
             gif.attr("data-animate", active);
             gif.attr("data-state", "still");
-            //gif.addClass("friend-image");
+            gif.addClass(".friend-image");
 
             friendDiv.append(rp);
             friendDiv.append(gif);
@@ -67,14 +66,17 @@ $(document).on("click", ".friend-buttons", function(){
     })
 })
 
+$(document).on("click", ".friend-image", function(){
+    var state = $(this).attr("data-state");
 
-
-
-
-
-
-
-
+    if (state === "still"){
+        $(this).attr("src", $(this).attr("data-animate"));
+        $(this).attr("data-state", "animate")
+    } else {
+        $(this).attr("src", $(this).attr("data-still"));
+        $(this).attr("data-state", "still")
+    }
+})
 
 createButtons(characters, "friend-button", "#friend-buttons")
 })
